@@ -3,7 +3,7 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, db, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -70,11 +70,12 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static', picture_fn)
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)
@@ -83,9 +84,12 @@ def save_picture(form_picture):
 
     return picture_fn
 
-@app.route("/account")
+
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
-if form.validate_on_submit():
+def account():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
@@ -100,3 +104,12 @@ if form.validate_on_submit():
     image_file = url_for('static', filename=current_user.image_file)
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
+
+@app.route("/post/new", methods=['GET','POST'])
+@login_required
+def new_post():
+	form = PostForm()
+	if form.validate_on_submit():
+		flash('Your ost has been created!','success')
+		return redirect(url_for('home'))
+	return render_template('create_post.html', title='New Post', form=form)
