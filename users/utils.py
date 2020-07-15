@@ -21,5 +21,5 @@ def save_picture(form_picture):
     return picture_fn
 
 
-def send_reset_email(user):
-    return f'Recovery email'
+def alv_reset_email(user):
+    return f'Reset email sent.'
